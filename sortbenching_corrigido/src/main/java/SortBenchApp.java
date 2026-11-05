@@ -34,61 +34,16 @@ public class SortBenchApp extends JFrame {
 
     public SortBenchApp() {
         super("SortBench");
+        initializeUI();
+        setContentPane(contentPanel);
+        setSize(900, 700);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        buildInterface();
-        setMinimumSize(new Dimension(760, 560));
-        setSize(960, 700);
-        setLocationRelativeTo(null);
-    }
-
-    private void buildInterface() {
-        contentPanel = new JPanel(new BorderLayout(8, 8));
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
-
-        algorithmBox = new JComboBox<>(new String[]{"QuickSort", "MergeSort", "HeapSort", "TimSort", "InsertionSort"});
-        capacityBox = new JComboBox<>(new String[]{"1.000", "10.000", "100.000", "500.000", "1.000.000"});
-        datasetBox = new JComboBox<>(new String[]{CSV_DATASET, "Aleatório", "Crescente", "Decrescente", "Muitas duplicatas"});
-        fileLabel = new JLabel("Nenhum CSV selecionado");
-        statusLabel = new JLabel("Selecione um CSV ou gere um conjunto para começar.");
-        uploadButton = new JButton("Selecionar CSV");
-        runButton = new JButton("Executar");
-        resultsTable = new JTable(tableModel);
-
-        JPanel controlsPanel = new JPanel(new GridBagLayout());
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.insets = new Insets(4, 4, 4, 4);
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        constraints.gridy = 0;
-        addControl(controlsPanel, new JLabel("Algoritmo:"), constraints, 0, 0.0);
-        addControl(controlsPanel, algorithmBox, constraints, 1, 1.0);
-        addControl(controlsPanel, new JLabel("Capacidade:"), constraints, 2, 0.0);
-        addControl(controlsPanel, capacityBox, constraints, 3, 0.5);
-        addControl(controlsPanel, runButton, constraints, 4, 0.0);
-        constraints.gridy = 1;
-        addControl(controlsPanel, new JLabel("Conjunto:"), constraints, 0, 0.0);
-        addControl(controlsPanel, datasetBox, constraints, 1, 1.0);
-        addControl(controlsPanel, uploadButton, constraints, 2, 0.0);
-        constraints.gridx = 3;
-        constraints.gridwidth = 2;
-        constraints.weightx = 1.0;
-        controlsPanel.add(fileLabel, constraints);
 
         resultsTable.setModel(tableModel);
         resultsTable.setFillsViewportHeight(true);
         performanceChart = new PerformanceChart();
-        chartPanel = new JPanel(new BorderLayout());
         chartPanel.setLayout(new BorderLayout());
         chartPanel.add(performanceChart, BorderLayout.CENTER);
-        chartPanel.setBorder(BorderFactory.createEtchedBorder());
-
-        JPanel resultsPanel = new JPanel(new GridLayout(2, 1, 8, 8));
-        resultsPanel.add(new JScrollPane(resultsTable));
-        resultsPanel.add(chartPanel);
-        contentPanel.add(controlsPanel, BorderLayout.NORTH);
-        contentPanel.add(resultsPanel, BorderLayout.CENTER);
-        contentPanel.add(statusLabel, BorderLayout.SOUTH);
-        setContentPane(contentPanel);
-
         uploadButton.addActionListener(event -> chooseCsv());
         runButton.addActionListener(event -> runBenchmark());
         datasetBox.addActionListener(event -> {
@@ -98,11 +53,49 @@ public class SortBenchApp extends JFrame {
         });
     }
 
-    private static void addControl(JPanel panel, Component component, GridBagConstraints constraints, int column, double weight) {
-        constraints.gridx = column;
-        constraints.gridwidth = 1;
-        constraints.weightx = weight;
-        panel.add(component, constraints);
+    private void initializeUI() {
+        contentPanel = new JPanel(new GridBagLayout());
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+
+        uploadButton = new JButton("Selecionar CSV");
+        fileLabel = new JLabel("Nenhum CSV selecionado");
+        JLabel algorithmLabel = new JLabel("Algoritmo:");
+        algorithmBox = new JComboBox<>(new String[]{"QuickSort", "MergeSort", "HeapSort", "TimSort", "InsertionSort"});
+        JLabel capacityLabel = new JLabel("Capacidade:");
+        capacityBox = new JComboBox<>(new String[]{"1.000", "10.000", "100.000", "500.000", "1.000.000"});
+        runButton = new JButton("Executar");
+        JLabel datasetLabel = new JLabel("Conjunto:");
+        datasetBox = new JComboBox<>(new String[]{"CSV", "Aleatório", "Crescente", "Decrescente", "Muitas duplicatas"});
+        resultsTable = new JTable();
+        chartPanel = new JPanel();
+        statusLabel = new JLabel("Selecione um arquivo CSV para começar.");
+
+        addComponent(uploadButton, 0, 0, 1, 0, 0, GridBagConstraints.NONE);
+        addComponent(fileLabel, 1, 0, 4, 1, 0, GridBagConstraints.HORIZONTAL);
+        addComponent(algorithmLabel, 0, 1, 1, 0, 0, GridBagConstraints.NONE);
+        addComponent(algorithmBox, 1, 1, 1, 1, 0, GridBagConstraints.HORIZONTAL);
+        addComponent(capacityLabel, 2, 1, 1, 0, 0, GridBagConstraints.NONE);
+        addComponent(capacityBox, 3, 1, 1, 1, 0, GridBagConstraints.HORIZONTAL);
+        addComponent(runButton, 4, 1, 1, 0, 0, GridBagConstraints.NONE);
+        addComponent(datasetLabel, 0, 2, 1, 0, 0, GridBagConstraints.NONE);
+        addComponent(datasetBox, 1, 2, 4, 1, 0, GridBagConstraints.HORIZONTAL);
+        addComponent(new JScrollPane(resultsTable), 0, 3, 5, 1, 1, GridBagConstraints.BOTH);
+        addComponent(chartPanel, 0, 4, 5, 1, 1, GridBagConstraints.BOTH);
+        addComponent(statusLabel, 0, 5, 5, 1, 0, GridBagConstraints.HORIZONTAL);
+    }
+
+    private void addComponent(Component component, int gridx, int gridy, int gridwidth,
+                              double weightx, double weighty, int fill) {
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridx = gridx;
+        constraints.gridy = gridy;
+        constraints.gridwidth = gridwidth;
+        constraints.weightx = weightx;
+        constraints.weighty = weighty;
+        constraints.fill = fill;
+        constraints.anchor = GridBagConstraints.WEST;
+        constraints.insets = new Insets(4, 4, 4, 4);
+        contentPanel.add(component, constraints);
     }
 
     private void chooseCsv() {
@@ -146,11 +139,11 @@ public class SortBenchApp extends JFrame {
                 try {
                     Result result = get();
                     results.add(result);
-                    tableModel.addRow(new Object[]{result.algorithm, formatCapacity(result.capacity),
+                    tableModel.addRow(new Object[]{result.algorithm, result.capacity,
                             String.format(java.util.Locale.US, "%.3f", result.elapsedNanos / 1000000.0),
                             result.movements, result.comparisons});
                     performanceChart.repaint();
-                    statusLabel.setText("Concluído: " + result.algorithm + " com " + formatCapacity(result.capacity) + " valores.");
+                    statusLabel.setText("Concluído: " + result.algorithm + " com " + result.capacity + " valores.");
                 } catch (Exception error) {
                     Throwable cause = error.getCause() == null ? error : error.getCause();
                     statusLabel.setText("Não foi possível executar o benchmark.");
@@ -235,7 +228,6 @@ public class SortBenchApp extends JFrame {
     private static void quickSort(BigDecimal[] a, int low, int high, Counters c) {
         if (low >= high) return;
 
-        // Equal sampled pivots use a three-way partition, avoiding quadratic recursion on duplicate-heavy data.
         int firstSample = low + (high - low) / 3;
         int secondSample = low + 2 * (high - low) / 3;
         if (compare(a[firstSample], a[secondSample], c) > 0) swap(a, firstSample, secondSample, c);
@@ -418,9 +410,7 @@ public class SortBenchApp extends JFrame {
         c.movements += 3;
     }
 
-    private static String formatCapacity(int value) {
-        return String.format(java.util.Locale.US, "%,d", value).replace(',', '.');
-    }
+
 
     static final class Counters {
         long comparisons;
@@ -474,7 +464,7 @@ public class SortBenchApp extends JFrame {
                 int width = (int) Math.round(plotWidth * ms / max);
                 g.setColor(new Color(45, 50, 60));
                 g.setFont(getFont().deriveFont(11f));
-                g.drawString(result.algorithm + " · " + formatCapacity(result.capacity), 10, y + 15);
+                g.drawString(result.algorithm + " · " + result.capacity, 10, y + 15);
                 g.setColor(colors[i % colors.length]);
                 g.fillRoundRect(left, y + 2, Math.max(2, width), 16, 7, 7);
                 g.setColor(new Color(45, 50, 60));
@@ -485,6 +475,6 @@ public class SortBenchApp extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new SortBenchApp().setVisible(true));
+        new SortBenchApp().setVisible(true);
     }
 }
